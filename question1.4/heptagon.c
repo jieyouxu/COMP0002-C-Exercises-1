@@ -1,44 +1,77 @@
-/**
- * First use De Moivre's Theorem to find the 7th roots of unity for (0+1i) so that the top point is centered horizontally.
- * The calculated results are:
- * (0+1i) => r = 1, theta = pi/4
- *  real part       imaginary part
- *  ==============================
- *  0.993712	    0.111964
- *  0.532032	    0.846724
- *  -0.330279	    0.943883
- *  -0.943883	    0.330279
- *  -0.846724	    -0.532032
- *  -0.111964	    -0.993712
- *  0.707107	    -0.707107
- *  ==============================
- * Then, let the real part and imaginary part be the corresponding x and y coordinates on the Cartesian plane.
- * The radius of the heptagon is only 1, so to be able to draw it properly it needs to be scaled up.
- * An arbitrary scale factor 50 is chosen and the coordinates are offset by 250 on x and 150 on y.
- *  x               y
- *  ==============================
- *  300	            156
- *  277	            192
- *  233	            197
- *  203	            167
- *  208	            123
- *  244	            100
- *  285	            115
- *  ==============================
- * 
- * TODO: implement heptagon drawing algorithm in C.
- */
+#include <math.h>
 
 #include "../graphics/graphics.h"
 
+#define PI 3.14159265358979
+
+// Polar form of a Complex number
+typedef struct ComplexNumber {
+    double modulus;
+    double argument;
+} ComplexNumber;
+
+static ComplexNumber c = {
+    .modulus = 1.0, 
+    .argument = 0
+};
+
+typedef struct Point {
+    double x;
+    double y;
+} Point;
+
+#define EDGES 7
+#define SCALE_FACTOR 100
+#define OFFSET_X 250
+#define OFFSET_Y 150
+
+static Point heptagonPoints[EDGES];
+
+void calculateHeptagonPoints() {
+    for (int k = 0; k < EDGES; k++) {
+        double x_coordinate = cos((2*k*PI)/7);
+        double y_coordinate = sin((2*k*PI)/7);
+
+        heptagonPoints[k].x = x_coordinate;
+        heptagonPoints[k].y = y_coordinate;
+    }
+}
+
+void scaleUpHeptagonPoints() {
+    for (int k = 0; k < EDGES; k++) {
+        heptagonPoints[k].x *= SCALE_FACTOR;
+        heptagonPoints[k].y *= SCALE_FACTOR;
+    }
+}
+
+void offsetHeptagonPoints() {
+    for (int k = 0; k < EDGES; k++) {
+        heptagonPoints[k].x += OFFSET_X;
+        heptagonPoints[k].y += OFFSET_Y;
+    }
+}
+
+void drawLastEdge() {
+    Point startingPoint = heptagonPoints[0];
+    Point endingPoint = heptagonPoints[EDGES - 1];
+    drawLine(startingPoint.x, startingPoint.y, endingPoint.x, endingPoint.y);
+}
+
+void drawHeptagon() {
+    for (int k = 0; k < EDGES - 1; k++) {
+        Point p1 = heptagonPoints[k];
+        Point p2 = heptagonPoints[k+1];
+        drawLine(p1.x, p1.y, p2.x, p2.y);
+    }
+
+    drawLastEdge();
+}
+
 int main(void) {
-    drawLine(300, 156, 277, 192);
-    drawLine(277, 192, 233, 197);
-    drawLine(233, 197, 203, 167);
-    drawLine(203, 167, 208, 123);
-    drawLine(208, 123, 244, 100);
-    drawLine(244, 100, 285, 115);
-    drawLine(285, 115, 300, 156);
+    calculateHeptagonPoints();
+    scaleUpHeptagonPoints();
+    offsetHeptagonPoints();
+    drawHeptagon();
 
     return 0;
 }
